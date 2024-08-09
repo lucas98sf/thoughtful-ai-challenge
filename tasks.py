@@ -36,10 +36,13 @@ class StringUtils:
 class WorkItemManager:
     def __init__(self):
         self.library = WorkItems()
+        logging.info("Initialized WorkItems library.")
 
     def get_variables(self) -> dict:
         self.library.get_input_work_item()
-        return self.library.get_work_item_variables()
+        variables = self.library.get_work_item_variables()
+        logging.info("Retrieved work item variables.")
+        return variables
 
 
 class LATimesNewsSearch:
@@ -47,8 +50,10 @@ class LATimesNewsSearch:
         self.variables = variables
         self.driver = Selenium()
         self.news = []
+        logging.info("Initialized LATimesNewsSearch with given variables.")
 
     def open_browser(self):
+        logging.info("Opening LATimes website.")
         self.driver.open_browser(
             "https://www.latimes.com/",
             service_log_path=os.devnull,
@@ -56,6 +61,7 @@ class LATimesNewsSearch:
         )
 
     def perform_search(self):
+        logging.info(f"Performing search for phrase: '{self.variables['phrase']}'.")
         self.driver.find_element(
             "xpath://button[@data-element='search-button']"
         ).click()
@@ -71,18 +77,22 @@ class LATimesNewsSearch:
         )
 
     def filter_category(self):
+        logging.info(f"Filtering results by category: '{self.variables['category']}'.")
         categories = self.driver.find_elements(
             "css:.search-filter-menu > li > div > div.checkbox-input > label > span"
         )
         for category in categories:
             if self.variables["category"].lower() in category.text.lower():
                 self.driver.find_element(category).click()
+                logging.info(f"Category '{category.text}' selected.")
                 break
 
     def collect_news(self):
+        logging.info("Starting to collect news items.")
         within_last_x_months = True
         page = 1
         while within_last_x_months:
+            logging.info(f"Processing page {page}.")
             news_timestamps = self.driver.find_elements("css:.promo-timestamp")
             titles = self.driver.find_elements("css:.promo-title")
             descriptions = self.driver.find_elements("css:.promo-description")
@@ -97,6 +107,9 @@ class LATimesNewsSearch:
                         idx, timestamp_value, titles, descriptions, images
                     )
                 else:
+                    logging.info(
+                        "News item is outside the specified time range. Stopping collection."
+                    )
                     within_last_x_months = False
                     break
             self.driver.find_element("css:.search-results-module-next-page").click()
@@ -113,10 +126,11 @@ class LATimesNewsSearch:
         picture_url = images[idx].get_attribute("src")
 
         logging.info(
-            f"Processing news item {idx + 1} with ID: {news_id} and Title: '{title}'"
+            f"Processing news item {idx + 1} with ID: {news_id} and Title: '{title}'."
         )
 
         urllib.request.urlretrieve(picture_url, OUTPUT_DIR / picture_filename)
+        logging.info(f"Image downloaded to {OUTPUT_DIR / picture_filename}.")
 
         search_phrase_count = title.lower().count(
             self.variables["phrase"].lower()
@@ -136,11 +150,14 @@ class LATimesNewsSearch:
                 "contains_money": contains_money,
             }
         )
+        logging.info(f"News item {news_id} processed and added to the list.")
 
     def close_browser(self):
+        logging.info("Closing the browser.")
         self.driver.close_browser()
 
     def save_to_excel(self):
+        logging.info("Saving collected news to Excel.")
         excel = Excel()
         excel.create_workbook(OUTPUT_DIR / "news.xlsx")
         excel.append_rows_to_worksheet(
@@ -162,6 +179,7 @@ class LATimesNewsSearch:
 
 @task
 def search_latimes_news():
+    logging.info("Starting the LATimes news search task.")
     work_item_manager = WorkItemManager()
     variables = work_item_manager.get_variables()
 
@@ -172,3 +190,4 @@ def search_latimes_news():
     latimes_news_search.collect_news()
     latimes_news_search.save_to_excel()
     latimes_news_search.close_browser()
+    logging.info("LATimes news search task completed.")
