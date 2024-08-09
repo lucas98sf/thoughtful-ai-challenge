@@ -69,13 +69,6 @@ def search_latimes_news():
             # logging.info(f"{category.text} selected")
             break
 
-    # if not (OUTPUT_DIR / "images").exists():
-    #     os.makedirs(OUTPUT_DIR / "images")
-    # else:
-    #     # clear images folder
-    #     for file in os.listdir(OUTPUT_DIR / "images"):
-    #         os.remove(OUTPUT_DIR / "images" / file)
-
     news = []
     within_last_x_months = True
     page = 1
@@ -105,9 +98,6 @@ def search_latimes_news():
                 picture_filename = f"{news_id}.jpg"
                 picture_url = images[idx].get_attribute("src")
                 # download image
-                # urllib.request.urlretrieve(
-                #     picture_url, OUTPUT_DIR / "images" / picture_filename
-                # )
                 urllib.request.urlretrieve(picture_url, OUTPUT_DIR / picture_filename)
 
                 search_phrase_count = title.lower().count(
