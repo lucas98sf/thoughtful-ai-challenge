@@ -40,9 +40,14 @@ def get_workitem_variables() -> dict:
 @task
 def search_latimes_news():
     driver = Selenium()
+
     variables = get_workitem_variables()
 
-    driver.open_browser("https://www.latimes.com/")
+    driver.open_browser(
+        "https://www.latimes.com/",
+        service_log_path=os.devnull,
+        browser="headlessfirefox",
+    )
     driver.find_element("xpath://button[@data-element='search-button']").click()
     driver.find_element("xpath://input[@data-element='search-form-input']").send_keys(
         variables["phrase"].lower()
