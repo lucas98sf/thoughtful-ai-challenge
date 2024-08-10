@@ -4,6 +4,7 @@ import pytz
 import re
 import shortuuid
 import urllib
+import zipfile
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
@@ -156,6 +157,21 @@ class LATimesNewsSearch:
         logging.info("Closing the browser.")
         self.driver.close_browser()
 
+    def save_images_to_zip(self):
+        zip_filename = OUTPUT_DIR / "news_images.zip"
+        logging.info(f"Creating ZIP file: {zip_filename}")
+
+        with zipfile.ZipFile(zip_filename, "w") as zipf:
+            for news_item in self.news:
+                image_path = OUTPUT_DIR / news_item["picture_filename"]
+                zipf.write(image_path, arcname=news_item["picture_filename"])
+                logging.info(f"Added {image_path} to ZIP file.")
+                if image_path.exists():
+                    image_path.unlink()
+                    logging.info(f"Deleted image file {image_path}.")
+
+        logging.info(f"ZIP file {zip_filename} created successfully.")
+
     def save_to_excel(self):
         logging.info("Saving collected news to Excel.")
         excel = Excel()
@@ -189,5 +205,6 @@ def search_latimes_news():
     latimes_news_search.filter_category()
     latimes_news_search.collect_news()
     latimes_news_search.save_to_excel()
+    latimes_news_search.save_images_to_zip()
     latimes_news_search.close_browser()
     logging.info("LATimes news search task completed.")

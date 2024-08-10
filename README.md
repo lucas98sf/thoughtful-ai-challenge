@@ -28,5 +28,8 @@
 
 ## Results
 
-🚀 After running the bot, check out the `log.html` under the `output` -folder.
-The downloaded images will alse be under the `output` -folder, together with a `news.xlsx` file that contains the news information
+🚀 After running the bot, check the `output` folder for:
+
+- The `log.html` file, which contains the execution log.
+- The `news_images.zip` file, which includes all downloaded images.
+- The `news.xlsx` file, which contains the news information.
