@@ -72,6 +72,7 @@ class LATimesNewsSearch:
             "xpath://button[@data-element='search-submit-button']"
         ).click()
         self.driver.find_element("css:.see-all-text").click()
+        # Sort news by newest
         self.driver.set_element_attribute(
             "css:.select-input > option:nth-child(2)", "selected", "selected"
         )
@@ -84,7 +85,6 @@ class LATimesNewsSearch:
         for category in categories:
             if self.variables["category"].lower() in category.text.lower():
                 self.driver.find_element(category).click()
-                logging.info(f"Category '{category.text}' selected.")
                 break
 
     def collect_news(self):
